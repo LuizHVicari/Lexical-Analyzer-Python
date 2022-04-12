@@ -9,15 +9,20 @@ def lerArquivo(codename):
     :param codename nome do arquivo que será lido
     :return string com os caracteres do arquivo se encontrar, 0 se não encontrar o arquivo
     """
+    # facilita a abertura do código com o nome padrão para entrar no arquivo codigoFonte.txt
     if codename == 'padrão':
         codename = 'codigoFonte.txt'
+    # coloca  a extensão txt no final do nome do arquivo
     elif not(',txt' in codename):
         codename += '.txt'
+    # tenta abrir o arquivo
     try:
+        # abre de maneira segura o arquivo txt e retorna uma string com os carcteres do arquivo
         with open(codename, 'r') as code:
             code = code.read()
             system('clear')
             return code
+    # se não encontrar o arquivo, retorna 0
     except FileNotFoundError:
         print('Arquivo não encontrado')
         return 0
@@ -28,13 +33,17 @@ def percorrerPalavras(codelinhas):
     :param string do arquivo spearadas por linhas
     :return lista de tokens separados por espaço, desconsiderando comentários
     """
+    # inicia o programa sem comentários abertos
     comentario_aberto = False
+    # percorre as linhas da string com arquivo
     for linha in codelinhas:
-        aux= linha.split()
-        for item in aux:
-            #print(item)
+        # separa a string nos espaços
+        palavras= linha.split()
+        for item in palavras:
+            # se encontrar uma chave aberta, abre os comentário e desconsidera todos os strings até fechar
             if item[0] == '{':
                 comentario_aberto = True
+            # fecha o comentário
             if comentario_aberto and item.find('}') != -1:
                 pos = item.find('}')
                 if pos < len(item):
@@ -43,9 +52,12 @@ def percorrerPalavras(codelinhas):
                 elif pos == len(item):
                     comentario_aberto = False
                     item = ''
+            # se o item não estiver em um comentário, adiciona ele na lista global
             if len(item) > 0:
                 if item[0] != '{' and not comentario_aberto:
                     codels.append(item)
+        
+        # adiciona o marcador de nova linha no final
         codels.append('###ENTER###')
     return codels
 
@@ -54,8 +66,10 @@ def analisarInteiro(word):
     :param: palavra para ser analisada
     :return: 0 se não corresponder a um número inteiro, 1 se corresponder
     '''
+    # valida inteiros negativos
     if word[0] == '-':
         word = word[1:len(word)]
+    # verifica se a palavra é um número
     if word.isnumeric():
         return True
     return False
@@ -65,8 +79,10 @@ def analisarFloat(word):
     :param: palavra para ser analisada
     :return: 0 se não corresponder a um número real, 1 se corresponder
     '''
+    # valida se reais são negativos
     if word[0] == '-':
         word = word[1:len(word)]
+    # verifica se está no formato para um float
     if '.' in word:
         real = word.split('.')
         if real[0].isnumeric() and real[1].isnumeric() and len(real) == 2:
@@ -78,8 +94,10 @@ def analisarIdentificador(word):
     :param: palavra para ser analisada
     :return: 0 se não corresponder a umidentificador, 1 se corresponder
     '''
+    #  verifica se começa com caracter
     if not(match('[a-zA-Z]', word[0])):
         return 0
+    # verifica se está no formato para um identificador
     for i in word:
         if not(match('\w', i)):
             return 0
@@ -98,102 +116,77 @@ def analisadorLexico (code):
                 linhaAtual += 1
             elif not(word == "###ENTER###"):
                 if word == 'inteiro' :
-                    tokenls.append(('INTEIRO', linhaAtual, word))
+                    tokenls.append('INTEIRO')
                 elif word =='real':
-                    tokenls.append(('REAL', linhaAtual, word))
+                    tokenls.append('REAL')
                 elif word =='booleano':
-                    tokenls.append(('BOOLEANO', linhaAtual, word))
+                    tokenls.append('BOOLEANO')
                 elif word == 'programa':
-                    tokenls.append(('PROGRAMA', linhaAtual, word))
+                    tokenls.append('PROGRAMA')
                 elif word == 'var':
-                    tokenls.append(('BLOCO', linhaAtual, word))
+                    tokenls.append('BLOCO')
                 elif word == ':':
-                    tokenls.append(('DELCARACAO', linhaAtual, word))
+                    tokenls.append('DELCARACAO')
                 elif word == 'inicio':
-                    tokenls.append(('COMANDO_INI', linhaAtual, word))
+                    tokenls.append('COMANDO_INI')
                 elif word == 'fim':
-                    tokenls.append(('COMANDO_FIM', linhaAtual, word))
+                    tokenls.append('COMANDO_FIM')
                 elif word == ':=':
-                    tokenls.append(('ATRIBUICAO', linhaAtual, word))
+                    tokenls.append('ATRIBUICAO')
                 elif word == 'se':
-                    tokenls.append(('CONDICIONAL_INI', linhaAtual, word))
+                    tokenls.append('CONDICIONAL_INI')
                 elif word == 'entao':
-                    tokenls.append(('CONDICIONAL_INSTRUCT', linhaAtual, word))
+                    tokenls.append('CONDICIONAL_INSTRUCT')
                 elif word == 'senao':
-                    tokenls.append(('CONDICIONAL_ELSE', linhaAtual, word))
+                    tokenls.append('CONDICIONAL_ELSE')
                 elif word == 'enquanto':
-                    tokenls.append(('LOOP_INI', linhaAtual, word))
+                    tokenls.append('LOOP_INI')
                 elif word == 'faca':
-                    tokenls.append(('LOOP_COMANDO', linhaAtual, word))
+                    tokenls.append('LOOP_COMANDO')
                 elif word == 'leia':
-                    tokenls.append(('LEITURA', linhaAtual, word))
+                    tokenls.append('LEITURA')
                 elif word == 'escreva':
-                    tokenls.append(('ESCRITA', linhaAtual, word))
+                    tokenls.append('ESCRITA')
                 elif word == '<>':
-                    tokenls.append(('DIFERENTE', linhaAtual, word))
+                    tokenls.append('DIFERENTE')
                 elif word == '<=':
-                    tokenls.append(('MENOR_IGUAL', linhaAtual, word))
+                    tokenls.append('MENOR_IGUAL')
                 elif word =='>=':
-                    tokenls.append(('MAIOR_IGUAL', linhaAtual, word))
+                    tokenls.append('MAIOR_IGUAL')
                 elif word =='>':
-                    tokenls.append(('MAIOR', linhaAtual, word))
+                    tokenls.append('MAIOR')
                 elif word =='>=':
-                    tokenls.append(('MENOR_IGUAL', linhaAtual, word))
+                    tokenls.append('MENOR_IGUAL')
                 elif word == '+':
-                    tokenls.append(('MAIS', linhaAtual, word))
+                    tokenls.append('MAIS')
                 elif word =='-':
-                    tokenls.append(('MENOS', linhaAtual, word))
+                    tokenls.append('MENOS')
                 elif word =='ou':
-                    tokenls.append(('OU', linhaAtual, word))
+                    tokenls.append('OU')
                 elif word == '*':
-                    tokenls.append(('MULTIPLICACAO', linhaAtual, word))
+                    tokenls.append('MULTIPLICACAO')
                 elif word =='/':
-                    tokenls.append(('DIVISAO', linhaAtual, word))
+                    tokenls.append('DIVISAO')
                 elif word =='e':
-                    tokenls.append(('E_LOGICO', linhaAtual, word))
+                    tokenls.append('E_LOGICO')
                 elif word =='(':
-                    tokenls.append(('ABRE_PARENTESES', linhaAtual, word))
+                    tokenls.append('ABRE_PARENTESES')
                 elif word ==')':
-                    tokenls.append(('FECHA_PARENTESES', linhaAtual, word))
+                    tokenls.append('FECHA_PARENTESES')
                 elif word ==';':
-                    tokenls.append(('PONTO_VIRGULA', linhaAtual, word))
+                    tokenls.append('PONTO_VIRGULA')
                 elif word ==',':
-                    tokenls.append(('VIRGULA', linhaAtual, word))
+                    tokenls.append('VIRGULA')
                 elif analisarInteiro(word):
-                    tokenls.append(('INTEIRO', linhaAtual, word))
+                    tokenls.append('INTEIRO')
                 elif analisarFloat(word):
-                    tokenls.append(('REAL', linhaAtual, word))
+                    tokenls.append('REAL')
                 elif analisarIdentificador(word):
-                    tokenls.append(('IDENTIFICADOR', linhaAtual, word))
+                    tokenls.append('IDENTIFICADOR')
                 else:
-                    tokenls.append(('ERROR', linhaAtual, word))
-                    erros.append((('ERROR', linhaAtual, word)))
+                    tokenls.append('ERROR')
+                    erros.append(('ERROR', linhaAtual, word))
     return tokenls, erros
-
-
-def printTokens(tokenls, wordPrint=False):
-    """
-    imprime a lista de tokens com a posição deles, depois imprime separadamente os erros, caso não haja erros, imprime que não há erros léxicos
-    :param lista de tuplas de tokens
-    :param controlador para imprimir ou não a palavra passada
-    :return none
-    """
-    linha = 1
-    for token in tokenls[0]:
-        if linha != token[1]:
-            print()
-            linha = token[1]
-        print(f'<{token[0]},{token[1]}', end = '')
-        if wordPrint:
-            print(f', {token[2]}>', end =' ')
-        else:
-            print('>', end=' ')
-
-    if len(tokenls[1]) > 0:
-        print(f'\n{tokenls[1]}')
-    else:
-        print('\nNão há erros léxicos')
-
 
 def anLex():
     """
@@ -204,7 +197,6 @@ def anLex():
     """
     global codels
     global tokens
-    global erros
     codels = list()
     codename = input('Informe o nome do arquivo de texto com: ')
     code = lerArquivo(codename)
@@ -212,9 +204,10 @@ def anLex():
         codelinhas = code.split('\n')
         percorrerPalavras(codelinhas)
         tokenls = analisadorLexico(code)
-        printTokens(tokenls)   
         tokens = tokenls[0]
         erros = tokenls[1]
+        print(tokens)
+        print(erros)
 
 
 anLex()
