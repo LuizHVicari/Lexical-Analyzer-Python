@@ -2,6 +2,7 @@
 # O programa usa a bibliteca re, mais especificamente a função match, para comparar expressões regulares
 
 from re import match
+from os import system
 
 def lerArquivo(codename):
     """
@@ -15,6 +16,7 @@ def lerArquivo(codename):
     try:
         with open(codename, 'r') as code:
             code = code.read()
+            system('clear')
             return code
     except FileNotFoundError:
         print('Arquivo não encontrado')
@@ -31,7 +33,7 @@ def percorrerPalavras(codelinhas):
         aux= linha.split()
         for item in aux:
             #print(item)
-            if item.find('{') != -1:
+            if item[0] == '{':
                 comentario_aberto = True
             if comentario_aberto and item.find('}') != -1:
                 pos = item.find('}')
@@ -47,6 +49,41 @@ def percorrerPalavras(codelinhas):
         codels.append('###ENTER###')
     return codels
 
+def analisarInteiro(word):
+    '''
+    :param: palavra para ser analisada
+    :return: 0 se não corresponder a um número inteiro, 1 se corresponder
+    '''
+    if word[0] == '-':
+        word = word[1:len(word)]
+    if word.isnumeric():
+        return True
+    return False
+
+def analisarFloat(word):
+    '''
+    :param: palavra para ser analisada
+    :return: 0 se não corresponder a um número real, 1 se corresponder
+    '''
+    if word[0] == '-':
+        word = word[1:len(word)]
+    if '.' in word:
+        real = word.split('.')
+        if real[0].isnumeric() and real[1].isnumeric() and len(real) == 2:
+            return True
+    return False
+        
+def analisarIdentificador(word):
+    '''
+    :param: palavra para ser analisada
+    :return: 0 se não corresponder a umidentificador, 1 se corresponder
+    '''
+    if not(match('[a-zA-Z]', word[0])):
+        return 0
+    for i in word:
+        if not(match('\w', i)):
+            return 0
+    return 1
 
 def analisadorLexico (code):
     """
@@ -59,7 +96,7 @@ def analisadorLexico (code):
     for word in codels:
             if word == '###ENTER###':
                 linhaAtual += 1
-            elif not(word == "###ENTER###") :
+            elif not(word == "###ENTER###"):
                 if word == 'inteiro' :
                     tokenls.append(('INTEIRO', linhaAtual, word))
                 elif word =='real':
@@ -122,11 +159,11 @@ def analisadorLexico (code):
                     tokenls.append(('PONTO_VIRGULA', linhaAtual, word))
                 elif word ==',':
                     tokenls.append(('VIRGULA', linhaAtual, word))
-                elif match('-*[0-9]', word):
+                elif analisarInteiro(word):
                     tokenls.append(('INTEIRO', linhaAtual, word))
-                elif match('-*[0-9].[0-9]+', word):
+                elif analisarFloat(word):
                     tokenls.append(('REAL', linhaAtual, word))
-                elif match('[A-Z|a-z]+[A-Z|a-z|0-9|_]*', word):
+                elif analisarIdentificador(word):
                     tokenls.append(('IDENTIFICADOR', linhaAtual, word))
                 else:
                     tokenls.append(('ERROR', linhaAtual, word))
@@ -134,10 +171,11 @@ def analisadorLexico (code):
     return tokenls, erros
 
 
-def printTokens(tokenls):
+def printTokens(tokenls, wordPrint=False):
     """
     imprime a lista de tokens com a posição deles, depois imprime separadamente os erros, caso não haja erros, imprime que não há erros léxicos
     :param lista de tuplas de tokens
+    :param controlador para imprimir ou não a palavra passada
     :return none
     """
     linha = 1
@@ -145,10 +183,14 @@ def printTokens(tokenls):
         if linha != token[1]:
             print()
             linha = token[1]
-        print(f'<{token[0]},{token[1]}>', end = ' ')
+        print(f'<{token[0]},{token[1]}', end = '')
+        if wordPrint:
+            print(f', {token[2]}>', end =' ')
+        else:
+            print('>', end=' ')
 
     if len(tokenls[1]) > 0:
-        print(tokenls[1])
+        print(f'\n{tokenls[1]}')
     else:
         print('\nNão há erros léxicos')
 
@@ -166,11 +208,13 @@ def anLex():
     codels = list()
     codename = input('Informe o nome do arquivo de texto com: ')
     code = lerArquivo(codename)
-    codelinhas = code.split('\n')
-    percorrerPalavras(codelinhas)
-    tokenls = analisadorLexico(code)
-    printTokens(tokenls)   
-    tokens = tokenls[0]
-    erros = tokenls[1]
+    if code:
+        codelinhas = code.split('\n')
+        percorrerPalavras(codelinhas)
+        tokenls = analisadorLexico(code)
+        printTokens(tokenls)   
+        tokens = tokenls[0]
+        erros = tokenls[1]
+
 
 anLex()
